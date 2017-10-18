@@ -9,11 +9,11 @@
 int test_name_availability(Client *clients, SOCKET sock, const char *name, int actual)
 {
     int i;
-    for (i = 0; i < 2; i++)
+    for (i = 0; i < actual; i++)
     {
         if(strcmp(clients[i].name, name) == 0)
         {
-            write_client(sock, "This username is already used\n");
+            write_client(sock, "This username is already used");
             shutdown(sock, SHUT_RDWR);
             remove_client(clients, i, &actual);
             return 0;
