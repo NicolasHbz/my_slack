@@ -21,6 +21,7 @@ static void app(void)
    while(1)
    {
       int i = 0;
+
       FD_ZERO(&rdfs);
 
       /* add STDIN_FILENO */
@@ -53,6 +54,7 @@ static void app(void)
          SOCKADDR_IN csin;
          unsigned int sinsize = sizeof csin;
          int csock = accept(sock, (SOCKADDR *)&csin, &sinsize);
+         
          if(csock == SOCKET_ERROR)
          {
             perror("accept()");
@@ -74,13 +76,16 @@ static void app(void)
          Client c = { csock, "" };
          strncpy(c.name, buffer, BUF_SIZE - 1);
          clients[actual] = c;
+         strncpy(buffer, c.name, BUF_SIZE - 1);
+         strncat(buffer, " is connected !", BUF_SIZE - strlen(buffer) - 1);
+         send_message_to_all_clients(clients, c, actual, buffer, 1);
          actual++;
       }
       else
       {
          int i = 0;
          for(i = 0; i < actual; i++)
-         {
+         {    
             /* a client is talking */
             if(FD_ISSET(clients[i].sock, &rdfs))
             {
@@ -104,7 +109,6 @@ static void app(void)
          }
       }
    }
-
    clear_clients(clients, actual);
    end_connection(sock);
 }

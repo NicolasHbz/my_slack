@@ -5,26 +5,6 @@
 
 #include "client.h"
 
-// static void init(void)
-// {
-// #ifdef WIN32
-//    WSADATA wsa;
-//    int err = WSAStartup(MAKEWORD(2, 2), &wsa);
-//    if(err < 0)
-//    {
-//       puts("WSAStartup failed !");
-//       exit(EXIT_FAILURE);
-//    }
-// #endif
-// }
-
-// static void end(void)
-// {
-// #ifdef WIN32
-//    WSACleanup();
-// #endif
-// }
-
 static void app(const char *address, const char *name)
 {
    SOCKET sock = init_connection(address);
@@ -114,7 +94,6 @@ static int init_connection(const char *address)
       perror("connect()");
       exit(errno);
    }
-
    return sock;
 }
 
