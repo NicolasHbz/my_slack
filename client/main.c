@@ -56,7 +56,7 @@ static void app(const char *address, const char *name)
          /* server down */
          if(n == 0)
          {
-            printf("Server disconnected !\n");
+            printf("You are disconnected !\n");
             break;
          }
          puts(buffer);
@@ -133,6 +133,7 @@ int main(int argc, char **argv)
       printf("Usage : %s [address] [pseudo]\n", argv[0]);
       return EXIT_FAILURE;
    }
+   printf("You are connected to the server !\n");
    app(argv[1], argv[2]);
    return EXIT_SUCCESS;
 }

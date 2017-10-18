@@ -6,6 +6,22 @@
 #include "server.h"
 #include "client.h"
 
+int test_name_availability(Client *clients, SOCKET sock, const char *name, int actual)
+{
+    int i;
+    for (i = 0; i < 2; i++)
+    {
+        if(strcmp(clients[i].name, name) == 0)
+        {
+            write_client(sock, "This username is already used\n");
+            shutdown(sock, SHUT_RDWR);
+            remove_client(clients, i, &actual);
+            return 0;
+        }
+    }
+    return 1;
+}
+
 static void app(void)
 {
    SOCKET sock = init_connection();
@@ -54,6 +70,7 @@ static void app(void)
          SOCKADDR_IN csin;
          unsigned int sinsize = sizeof csin;
          int csock = accept(sock, (SOCKADDR *)&csin, &sinsize);
+         int test = 0;
          
          if(csock == SOCKET_ERROR)
          {
@@ -75,11 +92,15 @@ static void app(void)
 
          Client c = { csock, "" };
          strncpy(c.name, buffer, BUF_SIZE - 1);
-         clients[actual] = c;
-         strncpy(buffer, c.name, BUF_SIZE - 1);
-         strncat(buffer, " is connected !", BUF_SIZE - strlen(buffer) - 1);
-         send_message_to_all_clients(clients, c, actual, buffer, 1);
-         actual++;
+         test = test_name_availability(clients, c.sock, c.name, actual);
+         if (test)
+         {
+            clients[actual] = c;
+            strncpy(buffer, c.name, BUF_SIZE - 1);
+            strncat(buffer, " is connected !", BUF_SIZE - strlen(buffer) - 1);
+            send_message_to_all_clients(clients, c, actual, buffer, 1);
+            actual++;
+         }
       }
       else
       {
