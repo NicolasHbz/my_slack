@@ -96,6 +96,7 @@ static void app(void)
          if (test)
          {
             clients[actual] = c;
+            write_client(c.sock, "You are connected to the server");
             strncpy(buffer, c.name, BUF_SIZE - 1);
             strncat(buffer, " is connected !", BUF_SIZE - strlen(buffer) - 1);
             send_message_to_all_clients(clients, c, actual, buffer, 1);

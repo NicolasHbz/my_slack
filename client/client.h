@@ -24,5 +24,7 @@ static int init_connection(const char *address);
 static void end_connection(int sock);
 static int read_server(SOCKET sock, char *buffer);
 static void write_server(SOCKET sock, const char *buffer);
+void exit_command(SOCKET sock);
+void command_list();
 
 #endif
