@@ -22,15 +22,15 @@ int test_name_availability(Client *clients, SOCKET sock, const char *name, int a
     return 1;
 }
 
-static void app(void)
+static void app(int maxClients)
 {
-   SOCKET sock = init_connection();
+    SOCKET sock = init_connection(maxClients);
    char buffer[BUF_SIZE];
    /* the index for the array */
    int actual = 0;
    int max = sock;
    /* an array for all clients */
-   Client clients[MAX_CLIENTS];
+   Client clients[maxClients];
 
    fd_set rdfs;
 
@@ -173,7 +173,7 @@ static void send_message_to_all_clients(Client *clients, Client sender, int actu
    }
 }
 
-static int init_connection(void)
+static int init_connection(int maxClients)
 {
    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
    SOCKADDR_IN sin;
@@ -194,7 +194,7 @@ static int init_connection(void)
       exit(errno);
    }
 
-   if(listen(sock, MAX_CLIENTS) == SOCKET_ERROR)
+   if (listen(sock, maxClients) == SOCKET_ERROR)
    {
       perror("listen()");
       exit(errno);
@@ -233,8 +233,69 @@ static void write_client(SOCKET sock, const char *buffer)
    }
 }
 
-int main()
+static int getMaxClient(int argc, char **argv)
 {
-   app();
-   return EXIT_SUCCESS;
+    int maxClients;
+
+    if (argc > 1)
+    {
+        maxClients = my_getnbr(argv[1]);
+        my_putstr("Client max : ");
+        my_putstr(argv[1]);
+    }
+    my_putstr("\nServeur run...");
+    return maxClients;
+}
+
+int main(int argc, char **argv)
+{
+    int maxClients;
+
+    maxClients = getMaxClient(argc, argv);
+    app(maxClients);
+    return EXIT_SUCCESS;
+}
+
+// FONCTIONS -----------------------------------------------------------------------------------------------
+int my_getnbr(char *str)
+{
+    int i;
+    int a;
+    int b;
+
+    a = 1;
+    i = 0;
+    while (str[i] != '\0' && (str[i] == '-' || str[i] == '+'))
+    {
+        if (str[i] == '-')
+        {
+            a = a * -1;
+        }
+        i++;
+    }
+    str = str + i;
+    b = 0;
+    i = 0;
+    while (str[i] <= '9' && str[i] >= '0')
+    {
+        b = b * 10;
+        b = b - (str[i] - '0');
+        i++;
+    }
+    return (b * a * -1);
+}
+
+int			my_strlen(const char *str)
+{
+  int			i;
+
+  i = 0;
+  while (str[i] != '\0')
+    i++;
+  return (i);
+}
+
+void			my_putstr(const char *str)
+{
+  write(1, str, my_strlen(str));
 }

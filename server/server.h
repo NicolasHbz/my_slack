@@ -22,13 +22,17 @@ typedef struct in_addr IN_ADDR;
 
 #include "client.h"
 
-static void app(void);
-static int init_connection(void);
+static void app(int maxClients);
+static int init_connection(int maxClients);
 static void end_connection(int sock);
 static int read_client(SOCKET sock, char *buffer);
 static void write_client(SOCKET sock, const char *buffer);
 static void send_message_to_all_clients(Client *clients, Client client, int actual, const char *buffer, char from_server);
 static void remove_client(Client *clients, int to_remove, int *actual);
 static void clear_clients(Client *clients, int actual);
+static int getMaxClient(int argc, char **argv);
+int my_getnbr(char *str);
+int my_strlen(const char *str);
+void my_putstr(const char *str);
 
 #endif
