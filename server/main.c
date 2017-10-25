@@ -233,10 +233,22 @@ static void write_client(SOCKET sock, const char *buffer)
    }
 }
 
+int isNumber(char *str) 
+{
+    while(*str != '\0')
+    {
+        if(*str < '0' || *str > '9')
+            return 0;
+        str++;
+    }
+    return 1;
+}
+
 static int getMaxClient(int argc, char **argv)
 {
     int maxClients;
 
+    maxClients = 0;
     if (argc > 1)
     {
         maxClients = my_getnbr(argv[1]);
@@ -247,9 +259,28 @@ static int getMaxClient(int argc, char **argv)
     return maxClients;
 }
 
+void usage_message(char **argv)
+{
+    printf("Usage : %s [MAX_CLIENT]\n", argv[0]);
+}
+
 int main(int argc, char **argv)
 {
     int maxClients;
+    int is_argv_number;
+
+    is_argv_number = 0;
+    if(argc != 2)
+    {
+       usage_message(argv);
+       return EXIT_FAILURE;
+    }
+    is_argv_number = isNumber(argv[1]);
+    if(!is_argv_number)
+    {
+        usage_message(argv);
+        return EXIT_FAILURE;
+    }
 
     maxClients = getMaxClient(argc, argv);
     app(maxClients);
