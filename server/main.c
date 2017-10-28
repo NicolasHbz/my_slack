@@ -22,17 +22,15 @@ int test_name_availability(Client *clients, SOCKET sock, const char *name, int a
     return 1;
 }
 
-static void app(int maxClients)
+void app(int maxClients)
 {
     SOCKET sock = init_connection(maxClients);
-   char buffer[BUF_SIZE];
-   /* the index for the array */
-   int actual = 0;
-   int max = sock;
-   /* an array for all clients */
-   Client clients[maxClients];
-
-   fd_set rdfs;
+    char buffer[BUF_SIZE];
+    int actual = 0;
+    int max = sock;
+    Client clients[maxClients];
+    fd_set rdfs;
+    my_putstr("\nServeur run...\n");
 
    while(1)
    {
@@ -40,13 +38,10 @@ static void app(int maxClients)
 
       FD_ZERO(&rdfs);
 
-      /* add STDIN_FILENO */
       FD_SET(STDIN_FILENO, &rdfs);
 
-      /* add the connection socket */
       FD_SET(sock, &rdfs);
 
-      /* add socket of each client */
       for(i = 0; i < actual; i++)
       {
          FD_SET(clients[i].sock, &rdfs);
@@ -58,15 +53,13 @@ static void app(int maxClients)
          exit(errno);
       }
 
-      /* something from standard input : i.e keyboard */
       if(FD_ISSET(STDIN_FILENO, &rdfs))
       {
-         /* stop process when type on keyboard */
          break;
       }
+
       else if(FD_ISSET(sock, &rdfs))
       {
-         /* new client */
          SOCKADDR_IN csin;
          unsigned int sinsize = sizeof csin;
          int csock = accept(sock, (SOCKADDR *)&csin, &sinsize);
@@ -78,14 +71,11 @@ static void app(int maxClients)
             continue;
          }
 
-         /* after connecting the client sends its name */
          if(read_client(csock, buffer) == -1)
          {
-            /* disconnected */
             continue;
          }
 
-         /* what is the new maximum fd ? */
          max = csock > max ? csock : max;
 
          FD_SET(csock, &rdfs);
@@ -108,12 +98,10 @@ static void app(int maxClients)
          int i = 0;
          for(i = 0; i < actual; i++)
          {    
-            /* a client is talking */
             if(FD_ISSET(clients[i].sock, &rdfs))
             {
                Client client = clients[i];
                int c = read_client(clients[i].sock, buffer);
-               /* client disconnected */
                if(c == 0)
                {
                   closesocket(clients[i].sock);
@@ -135,7 +123,7 @@ static void app(int maxClients)
    end_connection(sock);
 }
 
-static void clear_clients(Client *clients, int actual)
+void clear_clients(Client *clients, int actual)
 {
    int i = 0;
    for(i = 0; i < actual; i++)
@@ -144,22 +132,19 @@ static void clear_clients(Client *clients, int actual)
    }
 }
 
-static void remove_client(Client *clients, int to_remove, int *actual)
+void remove_client(Client *clients, int to_remove, int *actual)
 {
-   /* we remove the client in the array */
    memmove(clients + to_remove, clients + to_remove + 1, (*actual - to_remove - 1) * sizeof(Client));
-   /* number client - 1 */
    (*actual)--;
 }
 
-static void send_message_to_all_clients(Client *clients, Client sender, int actual, const char *buffer, char from_server)
+void send_message_to_all_clients(Client *clients, Client sender, int actual, const char *buffer, char from_server)
 {
    int i = 0;
    char message[BUF_SIZE];
    message[0] = 0;
    for(i = 0; i < actual; i++)
    {
-      /* we don't send message to the sender */
       if(sender.sock != clients[i].sock)
       {
          if(from_server == 0)
@@ -173,7 +158,7 @@ static void send_message_to_all_clients(Client *clients, Client sender, int actu
    }
 }
 
-static int init_connection(int maxClients)
+int init_connection(int maxClients)
 {
    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
    SOCKADDR_IN sin;
@@ -199,32 +184,28 @@ static int init_connection(int maxClients)
       perror("listen()");
       exit(errno);
    }
-
    return sock;
 }
 
-static void end_connection(int sock)
+void end_connection(int sock)
 {
    closesocket(sock);
 }
 
-static int read_client(SOCKET sock, char *buffer)
+int read_client(SOCKET sock, char *buffer)
 {
    int n = 0;
 
    if((n = recv(sock, buffer, BUF_SIZE - 1, 0)) < 0)
    {
       perror("recv()");
-      /* if recv error we disonnect the client */
       n = 0;
    }
-
    buffer[n] = 0;
-
    return n;
 }
 
-static void write_client(SOCKET sock, const char *buffer)
+void write_client(SOCKET sock, const char *buffer)
 {
    if(send(sock, buffer, strlen(buffer), 0) < 0)
    {
@@ -244,7 +225,7 @@ int isNumber(char *str)
     return 1;
 }
 
-static int getMaxClient(int argc, char **argv)
+int getMaxClient(int argc, char **argv)
 {
     int maxClients;
 
@@ -252,16 +233,20 @@ static int getMaxClient(int argc, char **argv)
     if (argc > 1)
     {
         maxClients = my_getnbr(argv[1]);
-        my_putstr("Client max : ");
-        my_putstr(argv[1]);
+        if (maxClients < 2 || maxClients > 100)
+        {
+            my_putstr("Please enter a number between 2 and 100\n");
+            exit(EXIT_FAILURE);
+        }
     }
-    my_putstr("\nServeur run...");
+    my_putstr("Maximum clients : ");
+    my_putstr(argv[1]);
     return maxClients;
 }
 
 void usage_message(char **argv)
 {
-    printf("Usage : %s [MAX_CLIENT]\n", argv[0]);
+    printf("Usage : %s [MAX_CLIENTS]\n", argv[0]);
 }
 
 int main(int argc, char **argv)
@@ -281,13 +266,12 @@ int main(int argc, char **argv)
         usage_message(argv);
         return EXIT_FAILURE;
     }
-
     maxClients = getMaxClient(argc, argv);
     app(maxClients);
     return EXIT_SUCCESS;
 }
 
-// FONCTIONS -----------------------------------------------------------------------------------------------
+// MY FONCTIONS -----------------------------------------------------------------------------------------------
 int my_getnbr(char *str)
 {
     int i;

@@ -15,7 +15,7 @@ static const Command orders_command[] =
 
 void exit_command(SOCKET sock)
 {
-    printf("You are leaving the server\n");
+    my_putstr("You are leaving the server\n");
     shutdown(sock, SHUT_RDWR);
     end_connection(sock);
     exit(EXIT_SUCCESS);
@@ -23,11 +23,11 @@ void exit_command(SOCKET sock)
 
 void command_list()
 {
-    printf("COMMAND LIST:\n");
-    printf("/exit\n\n");
+    my_putstr("COMMAND LIST:\n");
+    my_putstr("/exit\n\n");
 }
 
-static void app(const char *address, const char *name)
+void app(const char *address, const char *name)
 {
    SOCKET sock = init_connection(address);
    char buffer[BUF_SIZE];
@@ -35,18 +35,16 @@ static void app(const char *address, const char *name)
    int command_input = 0;
 
    fd_set rdfs;
-
-   /* send our name */
+   my_putstr("Connection to the server...\n");
+   my_putstr("Type \"/command_list\" to see the command list\n");
    write_server(sock, name);
 
    while(1)
    {
       FD_ZERO(&rdfs);
 
-      /* add STDIN_FILENO */
       FD_SET(STDIN_FILENO, &rdfs);
 
-      /* add the socket */
       FD_SET(sock, &rdfs);
 
       if(select(sock + 1, &rdfs, NULL, NULL, NULL) == -1)
@@ -55,7 +53,6 @@ static void app(const char *address, const char *name)
          exit(errno);
       }
 
-      /* something from standard input : i.e keyboard */
       if(FD_ISSET(STDIN_FILENO, &rdfs))
       {
         fgets(buffer, BUF_SIZE - 1, stdin);
@@ -67,7 +64,6 @@ static void app(const char *address, const char *name)
         }
         else
         {
-            /* fclean */
             buffer[BUF_SIZE - 1] = 0;
         }
         i = 0;
@@ -87,10 +83,9 @@ static void app(const char *address, const char *name)
       else if(FD_ISSET(sock, &rdfs))
       {
          int n = read_server(sock, buffer);
-         /* server down */
          if(n == 0)
          {
-            printf("You are disconnected !\n");
+            my_putstr("You are disconnected !\n");
             break;
          }
          puts(buffer);
@@ -99,7 +94,7 @@ static void app(const char *address, const char *name)
    end_connection(sock);
 }
 
-static int init_connection(const char *address)
+int init_connection(const char *address)
 {
    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
    SOCKADDR_IN sin;
@@ -114,7 +109,9 @@ static int init_connection(const char *address)
    hostinfo = gethostbyname(address);
    if (hostinfo == NULL)
    {
-      fprintf (stderr, "Unknown host %s.\n", address);
+      my_putstr("Unknown host ");
+      my_putstr(address);
+      my_putstr("\n");
       exit(EXIT_FAILURE);
    }
 
@@ -130,12 +127,12 @@ static int init_connection(const char *address)
    return sock;
 }
 
-static void end_connection(int sock)
+void end_connection(int sock)
 {
    closesocket(sock);
 }
 
-static int read_server(SOCKET sock, char *buffer)
+int read_server(SOCKET sock, char *buffer)
 {
    int n = 0;
 
@@ -144,13 +141,11 @@ static int read_server(SOCKET sock, char *buffer)
       perror("recv()");
       exit(errno);
    }
-
    buffer[n] = 0;
-
    return n;
 }
 
-static void write_server(SOCKET sock, const char *buffer)
+void write_server(SOCKET sock, const char *buffer)
 {
    if(send(sock, buffer, strlen(buffer), 0) < 0)
    {
@@ -161,13 +156,57 @@ static void write_server(SOCKET sock, const char *buffer)
 
 int main(int argc, char **argv)
 {
-   if(argc < 2)
+   if(argc < 3)
    {
-      printf("Usage : %s [address] [pseudo]\n", argv[0]);
+      my_putstr("Usage :  ");
+      my_putstr(argv[0]);
+      my_putstr(" [IP] [USERNAME]\n");
       return EXIT_FAILURE;
    }
-   printf("Connection to the server...\n");
-   printf("Type \"/command_list\" to see the command list\n");
    app(argv[1], argv[2]);
    return EXIT_SUCCESS;
+}
+
+// MY FONCTIONS -----------------------------------------------------------------------------------------------
+int my_getnbr(char *str)
+{
+    int i;
+    int a;
+    int b;
+
+    a = 1;
+    i = 0;
+    while (str[i] != '\0' && (str[i] == '-' || str[i] == '+'))
+    {
+        if (str[i] == '-')
+        {
+            a = a * -1;
+        }
+        i++;
+    }
+    str = str + i;
+    b = 0;
+    i = 0;
+    while (str[i] <= '9' && str[i] >= '0')
+    {
+        b = b * 10;
+        b = b - (str[i] - '0');
+        i++;
+    }
+    return (b * a * -1);
+}
+
+int			my_strlen(const char *str)
+{
+  int			i;
+
+  i = 0;
+  while (str[i] != '\0')
+    i++;
+  return (i);
+}
+
+void			my_putstr(const char *str)
+{
+  write(1, str, my_strlen(str));
 }

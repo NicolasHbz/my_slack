@@ -19,12 +19,15 @@ typedef struct in_addr IN_ADDR;
 #define PORT	 2000
 #define BUF_SIZE 1024
 
-static void app(const char *address, const char *name);
-static int init_connection(const char *address);
-static void end_connection(int sock);
-static int read_server(SOCKET sock, char *buffer);
-static void write_server(SOCKET sock, const char *buffer);
+void app(const char *address, const char *name);
+int init_connection(const char *address);
+void end_connection(int sock);
+int read_server(SOCKET sock, char *buffer);
+void write_server(SOCKET sock, const char *buffer);
 void exit_command(SOCKET sock);
 void command_list();
+int my_getnbr(char *str);
+int my_strlen(const char *str);
+void my_putstr(const char *str);
 
 #endif
