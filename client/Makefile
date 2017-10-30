@@ -3,6 +3,10 @@ CC	=	gcc
 NAME	=	my_slack
 
 SRC	=	main.c		\
+		app.c		\
+		command.c	\
+		connection.c	\
+		my_string.c	\
 
 OBJ	=	$(SRC:.c=.o)
 
