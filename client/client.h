@@ -29,5 +29,7 @@ void command_list();
 int my_getnbr(char *str);
 int my_strlen(const char *str);
 void my_putstr(const char *str);
+void usage_message(char **argv);
+int	my_strcmp(char *s1, char *s2);
 
 #endif

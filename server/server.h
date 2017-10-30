@@ -31,7 +31,12 @@ void remove_client(Client *clients, int to_remove, int *actual);
 void clear_clients(Client *clients, int actual);
 int getMaxClient(int argc, char **argv);
 int my_getnbr(char *str);
-int my_strlen(const char *str);
 void my_putstr(const char *str);
+char *my_strncpy(char *dest, char *src, int n);
+char *my_strncat(char *dest, const char *src, int nb);
+int test_name_availability(Client *clients, SOCKET sock, const char *name, int actual);
+int isNumber(char *str);
+void usage_message(char **argv);
+void app(int maxClients);
 
 #endif
